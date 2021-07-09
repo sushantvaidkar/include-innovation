@@ -1,6 +1,6 @@
 from database import db
 
-class Student(db.Model):
+class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_type = db.Column(db.String(10), nullable=False)
 
@@ -11,7 +11,7 @@ class Student(db.Model):
 
     def __init__(self, name, email, password) -> None:
         super().__init__()
-        self.user_type = "student"
+        self.user_type = "teacher"
 
         self.name = name
         self.email = email

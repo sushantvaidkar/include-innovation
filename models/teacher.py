@@ -1,4 +1,4 @@
-from database import db
+from models.database import db
 
 class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)

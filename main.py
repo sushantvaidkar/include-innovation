@@ -48,7 +48,7 @@ def login():
 
     else:
         return user
-   
+
 
 
 
@@ -56,6 +56,7 @@ def login():
 def register():
     if request.method=="GET":
         return redirect(url_for("home"))
+
     email=request.form.get("email")
     user_type=request.form.get("user_type")
     name=request.form.get("name")
@@ -63,25 +64,24 @@ def register():
     verify_password=request.form.get("verify_password")
 
     user = GetUser(email)
-    if  isinstance(user, Student) or   isinstance(user, Teacher) :
+    if isinstance(user, Student) or isinstance(user, Teacher) :
         flash(f"User with email {email} already exists!", "danger")
         return redirect(url_for("home"))
     else:
         if verify_password == password:
             if user_type =="student":
-                user= Student(name,email,password)
+                user = Student(name,email,password)
             if user_type =="teacher":
-                user= Teacher(name,email,password)
+                user = Teacher(name,email,password)
             db.session.add(user)
             db.session.commit()
 
             session["name"] = user.name
             session["email"] = user.email
-           
             session["user_type"] = user.user_type
 
             flash("Registered successfully!", "success")
-            return redirect(url_for("home"))       
+            return redirect(url_for("home"))
         else:
             flash(f"Invalid Password !", "danger")
             return redirect(url_for("home"))
@@ -91,31 +91,24 @@ def register():
 def logout():
     if request.method=="GET":
         return redirect(url_for("home"))
-    
-    del session["name"] 
-    del session["email"] 
-    del session["user_type"] 
+
+    del session["name"]
+    del session["email"]
+    del session["user_type"]
 
     flash(f"Logout Successful !", "success")
     return redirect(url_for("home"))
 
-   
- 
 def AuthorizeUser(user_type=None):
-    is_authorized = True
+    is_authorized = False
+
     if session.get("name") is not None and session.get("email") is not None:
-        if user_type is not None and session.get("user_type") != user_type:
-            is_authorized = False
-    else:
-        is_authorized = False
+        if user_type is not None and session.get("user_type") == user_type:
+            is_authorized = True
 
     return is_authorized
 
-
-
-
 def GetUser(email):
-
     user = None
     user = Student.query.filter_by(email=email).first()
 
@@ -128,6 +121,22 @@ def GetUser(email):
 
     flash(f"No such user with email {email}!", "danger")
     return redirect(url_for("home"))
+
+
+# Classroom Management
+@app.route("/dashboard", methods=["GET", "POST"])
+def dashboard():
+    is_authorized = AuthorizeUser("teacher")
+    if is_authorized:
+        return render_template("teacher_dashboard")
+
+    is_authorized = AuthorizeUser("student")
+    if is_authorized:
+        return render_template("student_dashboard")
+
+
+    return flash(f"Please login first!", "danger")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

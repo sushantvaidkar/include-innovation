@@ -5,6 +5,7 @@ from flask import render_template,request,redirect,url_for,flash,session
 from models.database import db
 from models.student import Student
 from models.teacher import Teacher
+from models.classroom import Classroom
 
 app = Flask(__name__)
 app.secret_key = "WCEHACKATHON"
@@ -16,11 +17,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 with app.app_context():
     db.init_app(app)
-    db.drop_all()
-    db.create_all()
-
-
-
+    # db.drop_all()
+    # db.create_all()
 
 @app.route("/")
 def home():
@@ -34,7 +32,7 @@ def login():
     password=request.form.get("password")
 
     user = GetUser(email)
-    if  isinstance(user, Student) or   isinstance(user, Teacher) :
+    if isinstance(user, Student) or isinstance(user, Teacher) :
         if user.password == password:
             session["name"] = user.name
             session["email"] = user.email
@@ -48,9 +46,6 @@ def login():
 
     else:
         return user
-
-
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -128,14 +123,73 @@ def GetUser(email):
 def dashboard():
     is_authorized = AuthorizeUser("teacher")
     if is_authorized:
-        return render_template("teacher_dashboard")
+        user = GetUser(session["email"])
+        classes = []
+        for classroom in user.classrooms:
+            print(classroom.name)
+            classes.append({
+                "name": classroom.name,
+                "desc": classroom.description,
+                "code": classroom.code,
+                "assignment": None
+            })
+
+        return render_template("teacher_dashboard.html", classes=classes)
 
     is_authorized = AuthorizeUser("student")
-    if is_authorized:
-        return render_template("student_dashboard")
 
+    if is_authorized:
+        user = GetUser(session["email"])
+        if request.method == "POST":
+            class_code = request.form.get("class_code")
+
+            classroom = Classroom.query.filter_by(code=class_code).first()
+            if classroom:
+                if classroom not in user.classrooms:
+                    user.classrooms.append(classroom)
+                    db.session.add(user)
+                    db.session.commit()
+
+                    flash(f"Joined classroom successfully!", "success")
+
+            else:
+                flash(f"No classroom found with code {class_code}!", "danger")
+
+        classes = []
+        for classroom in user.classrooms:
+            classes.append({
+                "name": classroom.name,
+                "desc": classroom.description,
+                "code": classroom.code,
+                "assignment": None
+            })
+
+        return render_template("student_dashboard.html", classes=classes)
 
     return flash(f"Please login first!", "danger")
+
+@app.route("/classroom/create", methods=["GET", "POST"])
+def ClassroomCreate():
+    if request.method == "GET":
+        return render_template("classroom_create.html")
+
+    is_teacher = AuthorizeUser("teacher")
+    if not is_teacher:
+        flash(f"Permission denied!", "danger")
+        return redirect(url_for("home"))
+
+    name = request.form.get("class_name")
+    description = request.form.get("class_desc")
+
+    user = GetUser(session["email"])
+
+    new_classroom = Classroom(name, description, teacher=user)
+    db.session.add(new_classroom)
+    db.session.commit()
+
+    flash(f"Classroom {name} created successfully!", "success")
+
+    return redirect(url_for("dashboard"))
 
 
 if __name__ == "__main__":

@@ -9,6 +9,9 @@ class Teacher(db.Model):
     email = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(64), nullable=False)
 
+    classrooms = db.relationship("Classroom", backref="teacher", lazy=True)
+
+
     def __init__(self, name, email, password) -> None:
         super().__init__()
         self.user_type = "teacher"

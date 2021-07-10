@@ -1,4 +1,4 @@
-from database import db
+from models.database import db
 
 def create_class_code():
     from string import ascii_letters
@@ -8,7 +8,7 @@ def create_class_code():
         code = ""
         for letter in range(5):
             code = code + choice(ascii_letters)
-        if Classroom.query.filter_by(code=code).first() is not None:
+        if Classroom.query.filter_by(code=code).first() is None:
             break
 
     return code
@@ -24,9 +24,9 @@ class Classroom(db.Model):
 
     def __init__(self, name, description, teacher) -> None:
         super().__init__()
-        self.user_type = "student"
 
         self.name = name
         self.description = description
         self.code = create_class_code()
         self.teacher = teacher
+

@@ -21,6 +21,7 @@ class Classroom(db.Model):
     code = db.Column(db.String(5), nullable=False)
 
     teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"))
+    assignments = db.relationship("Assignment", backref="classroom", lazy=True)
 
     def __init__(self, name, description, teacher) -> None:
         super().__init__()

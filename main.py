@@ -1,11 +1,14 @@
 from flask import Flask
 from flask import render_template,request,redirect,url_for,flash,session
 
+from datetime import datetime
+
 # Database and Models
 from models.database import db
 from models.student import Student
 from models.teacher import Teacher
 from models.classroom import Classroom
+from models.assignment import Assignment
 
 app = Flask(__name__)
 app.secret_key = "WCEHACKATHON"
@@ -98,7 +101,7 @@ def AuthorizeUser(user_type=None):
     is_authorized = False
 
     if session.get("name") is not None and session.get("email") is not None:
-        if user_type is not None and session.get("user_type") == user_type:
+        if user_type is None or session.get("user_type") == user_type:
             is_authorized = True
 
     return is_authorized
@@ -190,6 +193,101 @@ def ClassroomCreate():
     flash(f"Classroom {name} created successfully!", "success")
 
     return redirect(url_for("dashboard"))
+
+
+@app.route("/classroom/<class_code>", methods=["GET"])
+def ClassroomMain(class_code):
+    is_authorized = AuthorizeUser()
+    if not is_authorized:
+        flash("Permission denied!", "danger")
+        return redirect(url_for("home"))
+
+    classroom = Classroom.query.filter_by(code=class_code).first()
+    if not classroom:
+        flash("Classroom does not exist!", "danger")
+        return redirect(url_for("dashboard"))
+
+    user = GetUser(session["email"])
+    if classroom not in user.classrooms:
+        flash("Permission denied to class!", "danger")
+        return redirect(url_for("dashboard"))
+
+    assignments = Assignment.query.filter_by().first()
+
+    return render_template("classroom_main.html", classroom=classroom, assignments=classroom.assignments, current_time=datetime.now, strftime=lambda x: x.strftime("%a, %d %b %Y at %I:%M %p"))
+
+@app.route("/classroom/<class_code>/assignment/create", methods=["GET", "POST"])
+def AssignmentCreate(class_code):
+    is_authorized = AuthorizeUser("teacher")
+    if not is_authorized:
+        flash("Permission denied!", "danger")
+        return redirect(url_for("home"))
+
+    if request.method == "GET":
+        session["class_code"] = class_code
+        return render_template("assignment_create.html")
+    else:
+        print(class_code)
+        classroom = Classroom.query.filter_by(code=class_code).first()
+        print(classroom)
+        if not classroom:
+            flash("Classroom does not exist!", "danger")
+            return redirect(url_for("dashboard"))
+
+        user = GetUser(session["email"])
+        if classroom not in user.classrooms:
+            flash("Permission denied!", "danger")
+            return redirect(url_for("dashboard"))
+
+        name = request.form.get("assignment_name")
+        description = request.form.get("assignment_desc")
+        input_format = request.form.get("assignment_input_format")
+        output_format = request.form.get("assignment_output_format")
+
+        input_cases = []
+        for k in request.form.keys():
+            if "assignment_input_case" in k:
+                input_cases.append(request.form.get(k))
+        input_cases = "----".join(str(x) for x in input_cases if x)
+
+        output_cases = []
+        for k in request.form.keys():
+            if "assignment_output_case" in k:
+                output_cases.append(request.form.get(k))
+        output_cases = "----".join(str(x) for x in output_cases if x)
+
+        constraints = request.form.get("assignment_constraints")
+        deadline = request.form.get("assignment_deadline")
+
+        new_assignment = Assignment(name, description, deadline, classroom)
+        new_assignment.input_format = input_format
+        new_assignment.output_format = output_format
+        new_assignment.input_cases = input_cases
+        new_assignment.output_cases = output_cases
+        new_assignment.constraints = constraints
+
+
+        db.session.add(new_assignment)
+        db.session.commit()
+
+        flash("Assignment created successfully!", "success")
+        return redirect(f"/classroom/{class_code}")
+
+@app.route("/assignment/<assignment_code>", methods=["GET", "POST"])
+def AssignmentMain(assignment_code):
+    is_authorized = AuthorizeUser()
+    if not is_authorized:
+        flash("Permission denied!", "danger")
+        return redirect(url_for("home"))
+
+    assignment = Assignment.query.filter_by(code=assignment_code).first()
+    print(assignment)
+    if not assignment:
+        flash("Assignment not found!", "danger")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "GET":
+        return render_template("assignment_main.html", assignment=assignment, current_time=datetime.now, strftime=lambda x: x.strftime("%a, %d %b %Y at %I:%M %p"))
 
 
 if __name__ == "__main__":

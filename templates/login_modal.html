@@ -166,3 +166,26 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="ClassModal" tabindex="-1" aria-labelledby="ClassModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ClassModalLabel">Create New Class</h5>
+            </div>
+            <div class="modal-body container">
+                <form action="/classroom/create" method="POST">
+                    <div class="form-group mb-3">
+                        <label for="ClassName">Class Name</label>
+                        <input type="text" class="form-control" id="ClassName" name="class_name" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="ClassDescrpition">Class Description</label>
+                        <input type="text" class="form-control" id="ClassDescrpition" name="class_desc" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

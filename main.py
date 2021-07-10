@@ -16,8 +16,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 with app.app_context():
     db.init_app(app)
-   # db.drop_all()
-    #db.create_all()
+    # db.drop_all()
+    # db.create_all()
 
 
 
@@ -40,7 +40,7 @@ def login():
             session["email"] = user.email
             session["user_type"] = user.user_type
 
-            flash(f"Login Successful !", "Success")
+            flash(f"Login Successful !", "success")
             return redirect(url_for("home"))
         else:
             flash(f"Invalid Password !", "danger")
@@ -96,7 +96,7 @@ def logout():
     del session["email"] 
     del session["user_type"] 
 
-    flash(f"Logout Successful !", "Success")
+    flash(f"Logout Successful !", "success")
     return redirect(url_for("home"))
 
    

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock title %} | Coding Classroom</title>
+
+
+    <!-- Open sans google font -->
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+        rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/icofont/icofont.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/remixicon/remixicon.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/venobox/venobox.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/owl.carousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/aos/aos.css') }}" rel="stylesheet">
+
+    <!-- Main css file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+</head>
+
+<body>
+    <header id="header" class="fixed-top ">
+        <div class="container d-flex align-items-center">
+
+            <img class="mx-2 rounded-circle" src="{{ url_for('static', filename = 'img/LOGO.png') }}" alt="logo"
+                width="50" height="50" />
+            <span class="text-light"><h2>Coding Classroom</h2>
+                 <!--{% block logo %}{% endblock %}-->
+            </span>
+
+            <!-- Uncomment below if you prefer to use an image logo -->
+
+
+            <nav class="nav-menu d-none d-lg-block">
+                <ul>
+                    <li class="ml-5"><a href="/" class="align-top">Home</a></li>
+                    <li class="ml-1"><a href="#about">About</a></li>
+                    <li>
+                        {% block nav %}{% endblock %}
+                        {% if "email" in session %}
+
+                        {% endif %}
+                    </li>
+
+                    {% if "email" not in session %}
+                    <li class="ml-auto">
+                            <a href="#about" class="get-started-btn scrollto text-light" data-toggle="modal"
+                            data-target="#LoginModal">Sign In</a>
+                    </li>
+                    <li>
+                        
+                            <a href="#about" class="get-started-btn scrollto text-light align-items-center" data-toggle="modal" data-target="#SignUpModal">Sign Up</a>
+                    </li>
+                    {% else %}
+
+                    <li class="nav-item text-light text-sm-dark">
+                        {{ session["name"] }}
+                    </li>
+                    <li class="py-1">
+                        <a class="btn btn-block" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="py-1">
+                        <form action="/logout" method="POST">
+                            <button type="submit" class="btn btn-danger btn-block"><i
+                                    class="fas fa-sign-out-alt"></i></button>
+                        </form>
+                    </li>
+                    {% endif %}
+
+
+                </ul>
+                <div class="collapse navbar-collapse" id="navbarContent">
+
+                </div>
+            </nav><!-- .nav-menu -->
+            
+
+
+        </div>
+        <div class="container w-50">{% include 'include/flash.html' %}</div>
+    </header><!-- End Header -->
+    
+
+    
+
+
+    {% if "email" not in session %}
+        {% include 'include/login_modal.html' %}
+    {% endif %}
+
+    {% block body %}
+
+    {% endblock body %}
+    {% block scripts %}
+
+    {% endblock scripts %}
+    <!-- Vendor JS Files -->
+    <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/jquery.easing/jquery.easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/waypoints/jquery.waypoints.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/venobox/venobox.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/owl.carousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/aos/aos.js') }}"></script>
+
+    <!-- Template Main JS File -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+
+</body>
+
+</html>

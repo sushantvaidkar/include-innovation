@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Subject{% endblock %}
+{% block logo %}{{ classroom["name"] }}{% endblock %}
+
+{% block nav %}{% endblock %}
+
+{% block body %}
+<div class="container">
+
+
+    <div class="my-4 card text-light" style="background-image: url(../static/img/bg.png);">
+        <div class="card-body">
+            <div class="row align-items-center p-2">
+                <span class="h2 text-light col-auto" style="font-weight: 900;">{{ classroom["name"] }} </span>
+                <span class="col-auto ml-auto font-weight-bold">Class code: {{ classroom["code"] }}</span>
+            </div>
+        </div>
+        <div class="card-footer p-2 px-4">
+            <div class="row align-items-center">
+                <h6 class="col-auto">{{ classroom["desc"] }}</h6>
+                <h5 class="col-auto ml-auto">{{ classroom["teacher"].name }}</h5>
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <div class="container" style="background-color: #f3f5fa; border: 1px solid #dfdfff; margin-bottom: 200px;">
+
+
+        <div class="row mt-4 align-items-center ml-1 mb-3">
+            <h4 class="col-3">Assignments</h5>
+                {% if session["user_type"] == "teacher" %}
+                <div class="offset-5 w-auto col-4">
+                    <a class="btn-lightblue px-5 py-2 align-items-center"
+                        href="/classroom/{{ classroom['code'] }}/assignment/create"><i class="far fa-plus-square"></i>
+                        New assignment</a>
+                </div>
+                {% endif %}
+        </div>
+
+        <div class="row mx-2">
+            {% for idx in range(0, assignments|length, 3) %}
+            <!-- <div class="card-deck"> -->
+            {% for assignment in assignments[idx:idx+3] %}
+            <div class="col-lg-4 my-2">
+                <div class="card hover-shadow border-secondary ">
+                    <div class="card-body">
+                        <a href="/assignment/{{ assignment['code'] }}"
+                            class="card-title h5 text-decoration-none text-success">{{ assignment['name'] }}</a>
+                        <p class="card-text text-muted mt-2 text-truncate">{{ assignment['desc'] }}</p>
+                    </div>
+                    <div class="card-footer row mx-0 align-items-center pl-1">
+                        <span>
+                            Due:
+                            <span class="
+                                            {% if assignment.deadline and assignment.deadline < current_time() %}
+                                                text-danger
+                                            {% endif %}">
+                                {{ strftime(assignment.deadline) }}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <!-- </div> -->
+            {% endfor %}
+        </div>
+        {% if session["user_type"] == "teacher" %}
+        <div class="row mt-4 align-middle mx-auto">
+            <h5 class="col-auto mr-auto">Students</h5>
+            <!-- <div class="col-sm-6 w-auto col-12 text-center">
+                    <!-- <input type="email" placeholder="Enter student email" class="form-control"/> -->
+            <!-- <button type="button" class="btn btn-sm btn-outline-success">Add a student</button>
+                </div> -->
+        </div>
+
+        <table class="table table-hover mx-auto">
+            <thead>
+                <th>Sr No.</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Remove Student</th>
+            </thead>
+            {% for student in classroom.students %}
+            <tr>
+                <td class="">{{ loop.index }}.</td>
+
+                <td> {{ student.name }} </td>
+
+                <td class="font-italic">({{ student.email }})</td>
+                <td>
+                    <a href="/classroom/{{ classroom.code }}/remove/{{ student.id }}" class="">
+                        <h4><i class='bx bx-trash text-danger'></i></h4>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+
+        {% endif %}
+    </div>
+
+
+
+</div>
+
+
+<div class="container my-5"></div>
+<div class="container my-5"></div>
+<div class="container my-5"></div>
+<div class="container my-5"></div>
+<div class="container my-5"></div>
+<div class="container my-5"></div>
+<div class="container my-5"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmDelete(val) {
+        if (val == "{{ classroom['name'] | safe }}")
+            document.getElementById('confirm_delete').classList.remove("disabled");
+        else
+            document.getElementById('confirm_delete').classList.add("disabled");
+    }
+</script>
+{% endblock %}
